@@ -15,7 +15,7 @@
 ## 2. Engine lineage
 - Family / base engine and how it was modified: Radical Entertainment's Titanium engine `[reported]`. Scaleform GFx and Lua strings are present in the engine DLL `[inferred-static 2026-09-13]`.
 - Middleware (animation, audio, physics, megatexture, CUDA, etc.): **Scaleform GFx** for UI — and unusually it is **exported** from the engine DLL rather than hidden: all 77 exports are GFx symbols (`scaleformp3d::FlashFileHandler`, `GImage`, `GFxLoader`, `GSysFile`, `GBufferedFile`) `[inferred-static 2026-09-14]`. ⭐ That means the HUD is a separate, identifiable layer — exactly what has to be pulled out of the eye view later. **Lua** is present as `engine::LuaGOH` (a game-object handle). Bink for video, plus `WINMM`/`DSOUND` for audio.
-- Distinctive file formats / build tags / symbol naming: `.rcf` archives (12 of them, ~7.9 GB) and `.p3d` files (Radical's Pure3D format `[reported]`). ⚠️ Listed, **not opened**. Two are small enough to be worth opening first `[inferred-static 2026-09-14]`:
+- Distinctive file formats / build tags / symbol naming: `.rcf` archives (12 of them, ~7.9 GB) and `.p3d` files (Radical's Pure3D format `[reported]`). ⭐ **The two small ones are now OPENED** `[inferred-static 2026-09-14]`: both are `ATG CORE CEMENT LIBRARY` containers (matching `cementfiles.p3d` in the install root). **`shaders.rcf` holds readable HLSL source** (see §6); **`scripts.rcf` holds `init.lua` and a `frevents.lua` as compiled Lua bytecode** (the `ESC Lua` header), not source — readable only via a bytecode decompiler, though the engine carries the VM (`engine::LuaGOH`). Two are small enough to be worth opening first `[inferred-static 2026-09-14]`:
   - **`shaders.rcf` — 10.5 KB.** Far too small to hold a game's shaders, so almost certainly a *list* or index rather than the shaders themselves. Cheap to check.
   - **`scripts.rcf` — 182 KB.** With Lua confirmed in the engine, the most likely home of the game's scripts.
   - Build identity: both binaries linked **2025-08-14**, a recent rebuild rather than the 2009 shipping binary. ⚠️ **Any public research, offsets or trainers for Prototype almost certainly target the old build and will not apply.** Structure carries over; addresses do not.
@@ -31,6 +31,7 @@
 
 ## 4. DRM / anti-debug & injection foothold
 - DRM (CEG/Denuvo/GOG/none); launch-time-debugger behaviour: The launcher stub carries the Steam DRM wrapper section (`.bind`); the engine DLL itself shows no protection `[inferred-static 2026-09-13]`. Not tested live.
+- Injection vector: **`d3d9.dll` beside `prototypef.exe`**, available in principle — `prototypeenginef.dll` imports `d3d9.dll` -> `Direct3DCreate9` statically, and DLL search order is a property of the **process**, so the exe being a stub changes nothing `[inferred-static 2026-09-14]`. A proxy is built and deployed; **not yet run**.
 - Attach workflow that works: not yet tested.
 - Injection vector that works (proxy DLL name / injector / framework): not yet tested.
 
@@ -40,10 +41,40 @@
 - One-frame walkthrough (record → replay → present):
 
 ## 6. Camera & projection delivery (the crucial section)
-- How the world transform reaches the GPU (shared VP buffer / per-draw MVP /
-  other), with **shader-reflection / disassembly evidence**:
-- Exact constant-buffer slot, parameter name(s), byte offset(s), layout,
-  handedness, row/column convention:
+
+⭐ **The game ships readable HLSL SOURCE** in `shaders.rcf`, which declares its constants by name and
+register `[inferred-static 2026-09-14]` — the same class of find as Enslaved's shipped `.usf` files.
+Notes: `modding-notes/2026-09-14-shader-source-ships-and-the-proxy-is-ported.md`.
+
+```hlsl
+const float4x4 p3dWorldViewProjectionMatrix : register( c0 );
+...
+p3dPositionWorldViewProjection = mul( world_view_proj_matrix, position );
+```
+
+- How the world transform reaches the GPU: as a **FUSED world-view-projection matrix**, one 4x4
+  carrying all three — **unlike Dead Space 2**, whose projection arrives alone with the view elsewhere.
+  ⭐ **Consequence:** per-eye stereo is still easy (the shift a second eye needs is a clip-space shear,
+  `clip.x += dx * clip.w`, which pre-multiplies onto a fused matrix just as well). **Head tracking is
+  harder** — there is no view register to rotate, so the rotation must be injected CPU-side in
+  `proto::CameraManager` before the matrix is built. That makes the existing `CameraManager` `[PD]`
+  row the most important on this project.
+- Exact constant slot, name, layout: `p3dWorldViewProjectionMatrix` at `c0`, four registers, in the
+  sampled shaders. ⚠️ **`c0` is NOT a universal convention here** — `p3dLight_ObjectSpaceLightBounds`
+  sits at `c0` in one shader and `c4` in another, so registers are assigned **per shader**. The durable
+  finding is the **naming convention and the fused shape**, not the number. ⚠️ And 10.5 KB is a handful
+  of utility shaders (a Bink YUV player, a light-bounds helper, a basic transform), **not the game's
+  set** — the bulk are elsewhere. This is a sample.
+- Other declared constants: `p3dNaN` (`c1`/`c5`, used to cull a vertex), `p3dBuiltIn_Zero` (`c2`),
+  `p3dBuiltIn_One` (`c3`), `p3dLight_ObjectSpaceLightBounds` (`c0`/`c4`), samplers `y_tex`/`cb_tex`/
+  `cr_tex` (`s0`-`s2`).
+- Handedness, row/column convention: **not yet established.** The source shows `mul(matrix, position)`,
+  but the register packing the compiler chose is not readable from the source alone. The deployed
+  instrument tests both packings and will answer it.
+- **Instrument deployed** (`dev-archive/tools/proxy-d3d9/`), read-only, register-agnostic, ported from
+  `dead-space-2-vr` complete with that project's all-17-exports and wrap-don't-patch lessons.
+  `[compile-verified 2026-09-14]`; detector 15/15 and wrapper 16/16 `[verified-numerically 2026-09-14]`.
+  **Not yet run against the game.**
 - Where projection `P` / FOV comes from:
 - The per-eye override maths (`K_eye = …`):
 
