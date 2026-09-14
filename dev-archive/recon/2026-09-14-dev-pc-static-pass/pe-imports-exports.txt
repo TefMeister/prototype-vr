@@ -1,0 +1,48 @@
+======================================================================
+D:/Program Files (x86)/Steam/steamapps/common/Prototype/prototypef.exe
+  bits=32  linked=2025-08-14T17:42:11  imagebase=0x400000
+  ASLR(DYNAMIC_BASE)=NO  NX=no  relocs_stripped=yes
+  sections:
+    .text      vaddr=    0x1000 vsize=      7228 rawsize=      8192 chars=0x60000020
+    .rdata     vaddr=    0x3000 vsize=      5358 rawsize=      8192 chars=0x40000040
+    .data      vaddr=    0x5000 vsize=      1044 rawsize=      4096 chars=0xc0000040
+    .rsrc      vaddr=    0x6000 vsize=   2239120 rawsize=   2240512 chars=0x40000040
+    .bind      vaddr=  0x229000 vsize=    186376 rawsize=    186376 chars=0x60000000
+  imports:
+    KERNEL32.dll                 (  28) OutputDebugStringA, GetProcAddress, GetLastError, LoadLibraryA, SetCurrentDirectoryA, GetSystemDefaultLangID
+    USER32.dll                   (  21) GetKeyState, wsprintfA, DefWindowProcA, PostQuitMessage, SystemParametersInfoA, UnregisterClassA
+    GDI32.dll                    (   1) GetStockObject
+    ole32.dll                    (   2) CoInitialize, CoCreateInstance
+    OLEAUT32.dll                 (   3) SysFreeString, SysAllocString, VariantClear
+    MSVCR80.dll                  (  39) _crt_debugger_hook, _controlfp_s, _invoke_watson, ?_type_info_dtor_internal_method@type_info@@QAEXXZ, ?terminate@@YAXXZ, _decode_pointer
+    WS2_32.dll                   (   8) recv, WSAStartup, socket, WSACleanup, closesocket, inet_addr
+======================================================================
+D:/Program Files (x86)/Steam/steamapps/common/Prototype/prototypeenginef.dll
+  bits=32  linked=2025-08-14T17:43:02  imagebase=0x10000000
+  ASLR(DYNAMIC_BASE)=NO  NX=no  relocs_stripped=no
+  sections:
+    .text      vaddr=    0x1000 vsize=  14213988 rawsize=  14217216 chars=0x60000020
+    .rdata     vaddr=  0xd90000 vsize=   2466138 rawsize=   2469888 chars=0x40000040
+    .data      vaddr=  0xfeb000 vsize=   3429488 rawsize=   2519040 chars=0xc0000040
+    .idata     vaddr= 0x1331000 vsize=     11680 rawsize=     12288 chars=0xc0000040
+    .rsrc      vaddr= 0x1334000 vsize=      2249 rawsize=      4096 chars=0x40000040
+    .reloc     vaddr= 0x1335000 vsize=    975016 rawsize=    978944 chars=0x42000040
+  imports:
+    USER32.dll                   (  20) GetDesktopWindow, GetForegroundWindow, GetClientRect, GetWindowRect, GetWindowLongA, MapVirtualKeyExA
+    SHELL32.dll                  (   1) SHGetFolderPathA
+    MSVCR80.dll                  ( 140) ?terminate@@YAXXZ, ?_type_info_dtor_internal_method@type_info@@QAEXXZ, _crt_debugger_hook, _except_handler4_common, __clean_type_info_names_internal, _CIasin
+    WS2_32.dll                   (  29) __WSAFDIsSet, sendto, recvfrom, listen, connect, bind
+    iphlpapi.dll                 (   4) GetIpAddrTable, GetIfEntry, GetPerAdapterInfo, GetAdaptersInfo
+    d3d9.dll                     (   1) Direct3DCreate9
+    SHLWAPI.dll                  (   1) PathRelativePathToA
+    WINMM.dll                    (  11) waveOutGetNumDevs, waveOutWrite, waveOutPrepareHeader, waveOutOpen, waveOutClose, waveOutUnprepareHeader
+    binkw32.dll                  (  17) _BinkWait@4, _BinkSetSoundSystem@8, _RADTimerRead@0, _BinkSetSoundTrack@8, _BinkOpen@8, _BinkGetFrameBuffersInfo@8
+    RPCRT4.dll                   (   2) UuidToStringA, RpcStringFreeA
+    XINPUT1_3.dll                (   3) 
+    KERNEL32.dll                 ( 100) GetCurrentProcessId, GetTickCount, InterlockedCompareExchange, InterlockedExchange, GetTimeZoneInformation, VirtualAlloc
+    ADVAPI32.dll                 (  17) CryptGetHashParam, CryptDestroyHash, CryptReleaseContext, RegQueryValueExA, RegOpenKeyExA, RegCreateKeyExA
+    ole32.dll                    (   6) CoUninitialize, CoCreateInstance, CoInitialize, CoCreateGuid, CLSIDFromString, CoSetProxyBlanket
+    OLEAUT32.dll                 (   9) CreateErrorInfo, SetErrorInfo, VariantChangeType, SysFreeString, SysAllocString, VariantInit
+    SETUPAPI.dll                 (   6) SetupDiGetClassDevsA, SetupDiGetDeviceRegistryPropertyA, SetupDiDestroyDeviceInfoList, SetupDiGetDeviceInterfaceAlias, SetupDiGetDeviceInterfaceDetailA, SetupDiEnumDeviceInterfaces
+    DSOUND.dll                   (   1) 
+  exports: 77 -> ??0FlashFileHandler@scaleformp3d@@QAE@PBDHH@Z, ??0FlashFileHandler@scaleformp3d@@QAE@XZ, ??0GBufferedFile@@IAE@XZ, ??0GBufferedFile@@QAE@PAVGFile@@@Z, ??0GImage@@QAE@ABV0@@Z, ??0GImage@@QAE@ABVGImageBase@@@Z, ??0GImage@@QAE@W4ImageFormat@GImageBase@@KK@Z, ??0GImage@@QAE@XZ, ??0GRefCountBaseImpl@@QAE@PAVGRefCountImpl@@0@Z, ??0GRefCountBaseImpl@@QAE@XZ, ??0GSysFile@@QAE@PBDHH@Z, ??0GSysFile@@QAE@XZ, ??1GBufferedFile@@UAE@XZ, ??1GFxLoader@@UAE@XZ, ??1GImage@@UAE@XZ
