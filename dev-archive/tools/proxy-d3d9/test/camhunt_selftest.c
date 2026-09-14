@@ -173,6 +173,26 @@ int main(void) {
         printf("    (an announcement above naming c8 means the offset scan works)\n");
     }
 
+    printf("\nDISPLAY-ASPECT MARKING (earned by the Prototype run):\n");
+    {
+        /* A 16:9 camera and a square shadow frustum, announced with the display
+         * set to 1920x1080. Only the first should be marked. The check is on the
+         * log text, which is what a human actually reads. */
+        float cam[16], shadow[16];
+        persp_lh(cam,    0.8814f, 16.0f / 9.0f, 0.3f, 7500.0f);   /* ~50.5 deg vertical */
+        persp_lh(shadow, 0.8814f, 1.0f,         0.5f,  200.0f);   /* square */
+        camhunt_set_display(1920, 1080);
+        printf("    announcing a 16:9 camera - expect a MATCHES DISPLAY ASPECT mark:\n");
+        camhunt_observe(100, cam, 4);
+        printf("    announcing a square frustum - expect NO mark:\n");
+        camhunt_observe(200, shadow, 4);
+        /* A mirrored-X camera (Dead Space 2's shape) must still be marked. */
+        cam[0] = -cam[0];
+        printf("    announcing a MIRRORED-X 16:9 camera - expect a mark anyway:\n");
+        camhunt_observe(300, cam, 4);
+        camhunt_set_display(0, 0);   /* and marking must switch off cleanly */
+    }
+
     printf("\nROBUSTNESS (must not crash):\n");
     camhunt_observe(0, NULL, 4);
     camhunt_observe(0, m, 0);

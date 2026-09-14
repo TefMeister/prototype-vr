@@ -42,6 +42,72 @@
 
 ## 6. Camera & projection delivery (the crucial section)
 
+# 🏆 ANSWERED 2026-09-14 `[verified-live 2026-09-14, n=1 session, ~500k uploads]`
+
+Evidence: `dev-archive/recon/2026-09-14-camera-found/`; notes: `modding-notes/2026-09-14b-the-camera-is-found.md`.
+
+```
+c0, layout R (register i = row i), written as a dedicated "c0+4"
+    [  1.191754    0.000000    0.000000    0.000000 ]
+    [  0.000000    2.118673    0.000000    0.000000 ]
+    [  0.000000    0.000000    1.000040    1.000000 ]
+    [  0.000000    0.000000   -0.300012    0.000000 ]
+```
+
+| Property | Value |
+| --- | --- |
+| Register / width | **c0**, 4 registers (`c0+4`, 12,486 per 5 s) |
+| Packing | **layout R** (w-from-z at index 11) |
+| Handedness | **LEFT-handed**, `clip.w = +view.z` |
+| Aspect | **exactly 1.7778 = 16/9**, matching the 1920x1080 mode |
+| X axis | **not mirrored** (`xs` positive) - contrast Dead Space 2 |
+| Near / far | **0.300000 / 7500** |
+| FOV | **80.00 deg horizontal**, 50.53 vertical |
+
+⭐ **80.00 deg, near 0.3, far 7500 - three round numbers.** Independent corroboration that the matrix
+was read correctly, not merely found.
+
+⭐ **The depth term fits the textbook LH form exactly** (`m[10] = 1.000040` gives a clean `zf = 7500`),
+unlike Dead Space 2's non-standard one. Per-eye derivations can use the standard formulae here.
+
+**Eight fields of view, all at exactly 16:9** - 80.00 (normal), 60.80, 44.24, 42.73, 35.67, 32.70,
+20.51, 19.76 deg. One camera with a zoom ladder, not eight cameras.
+
+## ⚠️ CORRECTION to the static reading below: it is a PURE PROJECTION, not a fused WVP
+
+The shipped shader source (below) declares `p3dWorldViewProjectionMatrix : register( c0 )`, and this
+dossier concluded from it that the engine uses a **fused** world-view-projection - then reasoned that
+head tracking must therefore go CPU-side.
+
+**The runtime measurement refutes that for the gameplay path.** The matrix actually arriving at `c0`
+has a **perfectly diagonal upper-left 2x2 with zero rotation terms**; a fused WVP would carry the
+camera's rotation there. `[verified-live 2026-09-14]`
+
+⭐ **Both observations are true and the error was generalising.** This dossier already recorded that
+registers are assigned **per shader** and that 10.5 KB is a *sample* of utility shaders - and then
+reasoned as though the sample's convention were the engine's. The sampled shader does use a fused WVP;
+**the shaders that draw the game do not.**
+
+- The "second independent reason" for promoting the `proto::CameraManager` row is **withdrawn**. That
+  row stands on its original merit only.
+- ⭐ **Better news, not worse:** a separate projection gives the same clean split as Dead Space 2 -
+  **stereo shears the projection at c0, head tracking goes to whatever carries the view.**
+- **Where the view lives is the open question.** `c0+5` is the most common upload of all (49,260 per
+  5 s against the camera's 12,486) and its contents are unread. That is the next thing to look at.
+
+⚠️ **The detector is NOISY on this engine** - dozens of junk matches where Dead Space 2 produced three.
+What separated the camera was the aspect test, so the instrument now **computes the display aspect
+itself and marks matching signatures** rather than asking a human to divide.
+
+⚠️ The device is **not** a pure device (`BehaviorFlags=0x44`), so unlike Dead Space 2 a constant
+read-back instrument *would* work here if one is ever needed.
+
+⚠️ **n=1, one area (the tutorial). Nothing has been written.**
+
+---
+
+### The static reading that predicted it
+
 ⭐ **The game ships readable HLSL SOURCE** in `shaders.rcf`, which declares its constants by name and
 register `[inferred-static 2026-09-14]` — the same class of find as Enslaved's shipped `.usf` files.
 Notes: `modding-notes/2026-09-14-shader-source-ships-and-the-proxy-is-ported.md`.

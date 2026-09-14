@@ -190,8 +190,10 @@ static HRESULT STDMETHODCALLTYPE W_CreateDevice(IDirect3D9 *This, UINT Adapter, 
     log_msg("  -> hr=0x%08lX device=%p", (unsigned long)hr,
             ppDevice ? (void *)*ppDevice : NULL);
 
-    if (SUCCEEDED(hr) && ppDevice && *ppDevice)
+    if (SUCCEEDED(hr) && ppDevice && *ppDevice) {
+        if (pp) camhunt_set_display(pp->BackBufferWidth, pp->BackBufferHeight);
         camhunt_install(*ppDevice, g_real_d3d9_mod);
+    }
     else
         log_msg("  no device produced - the camera instrument cannot install");
     return hr;
