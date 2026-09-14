@@ -134,6 +134,50 @@ static int           g_sig_n;
 static unsigned long g_sig_dropped;
 static unsigned long g_uploads_total;
 
+/* ---- the display aspect, set by the wrapper at CreateDevice ---------------
+ * Earned by the Prototype tutorial run, 2026-09-14. Dead Space 2 produced three
+ * candidate signatures and the right one was obvious. Prototype produced DOZENS
+ * of junk matches -- blocks that merely happen to carry a +-1 in the w slot --
+ * and the ONLY thing that separated the camera from the noise was that its ys/xs
+ * equalled the display aspect ratio while everything else wandered.
+ *
+ * That test was previously a line of log text telling a human to do the division.
+ * On a noisy engine that is the difference between an answer and a list, so the
+ * instrument now does it. The numbers were always available: the wrapper sees the
+ * back-buffer dimensions in CreateDevice.
+ *
+ * ⚠️ Deliberately used to MARK, never to FILTER. A square (1.0) frustum is a
+ * legitimate shadow pass and worth seeing, and an engine that renders at a
+ * non-display aspect would be hidden entirely by a filter. */
+static float g_display_aspect = 0.0f;
+static unsigned int g_display_w = 0, g_display_h = 0;
+
+void camhunt_set_display(unsigned int width, unsigned int height) {
+    g_display_w = width;
+    g_display_h = height;
+    g_display_aspect = (height > 0) ? ((float)width / (float)height) : 0.0f;
+    if (g_display_aspect > 0.0f)
+        log_msg("CAMHUNT: display is %ux%u, aspect %.4f - signatures whose |ys/xs| matches that "
+                "will be marked. The camera is almost always the one that does.",
+                width, height, g_display_aspect);
+    else
+        log_msg("CAMHUNT: display dimensions unknown (%ux%u) - aspect marking disabled, "
+                "you will have to divide ys by xs yourself.", width, height);
+}
+
+/* |ys/xs| within 1%% of the display aspect. Absolute, because a mirrored X axis
+ * makes the ratio negative without making it any less the camera -- which is
+ * exactly what Dead Space 2's camera looks like. */
+static int matches_display_aspect(float xs, float ys) {
+    float r, d;
+    if (g_display_aspect <= 0.0f || xs == 0.0f) return 0;
+    r = ys / xs;
+    if (r < 0) r = -r;
+    d = r - g_display_aspect;
+    if (d < 0) d = -d;
+    return d <= 0.01f * g_display_aspect;
+}
+
 #define LIVE_MAX 8
 struct Live { unsigned int reg; float xs, ys; char layout; unsigned long n; };
 static struct Live g_live[LIVE_MAX];
@@ -150,8 +194,10 @@ static int sig_same(float a, float b) {
 
 static void log_matrix(unsigned int reg, const float *m, char layout, const struct Sig *sg) {
     float wz = (layout == CAMHUNT_COL) ? m[14] : m[11];
-    log_msg("PERSPECTIVE-SHAPED 4x4 at c%u, layout %c (%lu uploads seen so far):",
-            reg, layout, g_uploads_total);
+    log_msg("PERSPECTIVE-SHAPED 4x4 at c%u, layout %c (%lu uploads seen so far):%s",
+            reg, layout, g_uploads_total,
+            (sg && matches_display_aspect(sg->xs, sg->ys))
+                ? "   <<< MATCHES DISPLAY ASPECT - very likely the camera" : "");
     if (sg) {
         char rl[128]; int o = 0, i;
         for (i = 0; i < sg->nregs && o < (int)sizeof rl - 12; ++i)
@@ -262,13 +308,19 @@ void camhunt_observe(unsigned int start, const float *data, unsigned int count) 
                            "LIVE perspective signatures this period (reg layout xs ys ys/xs n):");
             for (j = 0; j < g_live_n && o2 < (int)sizeof l2 - 70; ++j) {
                 float ratio = g_live[j].xs != 0.0f ? g_live[j].ys / g_live[j].xs : 0.0f;
-                o2 += snprintf(l2 + o2, sizeof l2 - (size_t)o2, " [c%u %c %.6f %.6f %.4f n=%lu]",
+                o2 += snprintf(l2 + o2, sizeof l2 - (size_t)o2, " [c%u %c %.6f %.6f %.4f n=%lu%s]",
                                g_live[j].reg, g_live[j].layout, g_live[j].xs,
-                               g_live[j].ys, ratio, g_live[j].n);
+                               g_live[j].ys, ratio, g_live[j].n,
+                               matches_display_aspect(g_live[j].xs, g_live[j].ys) ? " <<<CAMERA?" : "");
             }
             log_msg("%s", l2);
-            log_msg("    THE CAMERA is the signature whose ys/xs equals the display aspect "
-                    "ratio (1.7778 at 16:9). A shadow pass is usually square (ratio 1.0).");
+            if (g_display_aspect > 0.0f)
+                log_msg("    entries marked <<<CAMERA? have |ys/xs| within 1%% of the display "
+                        "aspect %.4f (%ux%u). A shadow pass is usually square (ratio 1.0).",
+                        g_display_aspect, g_display_w, g_display_h);
+            else
+                log_msg("    THE CAMERA is the signature whose ys/xs equals the display aspect "
+                        "ratio (1.7778 at 16:9). A shadow pass is usually square (ratio 1.0).");
             g_live_n = 0;
         }
         log_msg("    distinct-signature table: %d/%d slots used, %lu dropped%s",

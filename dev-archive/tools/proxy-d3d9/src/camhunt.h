@@ -20,6 +20,11 @@
  * game running — see test/camhunt_selftest.c. */
 int camhunt_classify(const float *p);
 
+/* Tell the instrument the back-buffer shape, so it can work out the display
+ * aspect ratio itself instead of asking a human to divide ys by xs. Called from
+ * the wrapper's CreateDevice, where those numbers are already in hand. */
+void camhunt_set_display(unsigned int width, unsigned int height);
+
 /* Feed one SetVertexShaderConstantF upload to the instrument. */
 void camhunt_observe(unsigned int start, const float *data, unsigned int count);
 
