@@ -5,7 +5,7 @@
 > `dev-archive/` and `modding-notes/` folders; this file is the *distilled current
 > truth*. Update it whenever a fact changes; correct false leads in place.
 
-**Status:** M0, first static look (2026-09-13); the game has not been launched yet. · **VR-readiness verdict:** TBD. Nothing seen so far rules it out.
+**Status:** M0, static recon done on both machines (2026-09-13 home, 2026-09-14 dev PC); the game has **not** been launched yet. · **VR-readiness verdict:** promising on shape. All the real code sits in an **unprotected** DLL, and the camera lives in one named class (`proto::CameraManager`) that Lua can reach. Nothing has been run.
 
 ## 1. Identity
 - Game / build / version: Prototype, Steam build. `prototypef.exe` is a small launcher stub; the game code is in `prototypeenginef.dll`. Both are linked 2025-08-14, so this is a recent rebuild, not the 2009 binary `[inferred-static 2026-09-13]`.
@@ -14,13 +14,20 @@
 
 ## 2. Engine lineage
 - Family / base engine and how it was modified: Radical Entertainment's Titanium engine `[reported]`. Scaleform GFx and Lua strings are present in the engine DLL `[inferred-static 2026-09-13]`.
-- Middleware (animation, audio, physics, megatexture, CUDA, etc.):
-- Distinctive file formats / build tags / symbol naming: `.rcf` archives and `.p3d` files (Radical's Pure3D format `[reported]`), not yet looked at.
+- Middleware (animation, audio, physics, megatexture, CUDA, etc.): **Scaleform GFx** for UI — and unusually it is **exported** from the engine DLL rather than hidden: all 77 exports are GFx symbols (`scaleformp3d::FlashFileHandler`, `GImage`, `GFxLoader`, `GSysFile`, `GBufferedFile`) `[inferred-static 2026-09-14]`. ⭐ That means the HUD is a separate, identifiable layer — exactly what has to be pulled out of the eye view later. **Lua** is present as `engine::LuaGOH` (a game-object handle). Bink for video, plus `WINMM`/`DSOUND` for audio.
+- Distinctive file formats / build tags / symbol naming: `.rcf` archives (12 of them, ~7.9 GB) and `.p3d` files (Radical's Pure3D format `[reported]`). ⚠️ Listed, **not opened**. Two are small enough to be worth opening first `[inferred-static 2026-09-14]`:
+  - **`shaders.rcf` — 10.5 KB.** Far too small to hold a game's shaders, so almost certainly a *list* or index rather than the shaders themselves. Cheap to check.
+  - **`scripts.rcf` — 182 KB.** With Lua confirmed in the engine, the most likely home of the game's scripts.
+  - Build identity: both binaries linked **2025-08-14**, a recent rebuild rather than the 2009 shipping binary. ⚠️ **Any public research, offsets or trainers for Prototype almost certainly target the old build and will not apply.** Structure carries over; addresses do not.
 
 ## 3. Binary & memory
-- 32/64-bit, size, module base, ASLR behaviour (stable base? relocations?): **32-bit**. `prototypef.exe` 2.5 MB: almost all resources plus a `.bind` section. `prototypeenginef.dll` 20.2 MB: plain sections, relocations present `[inferred-static 2026-09-13]`.
-- Renderer API (D3D11/12, DXGI, GL, Vulkan) with evidence: Direct3D 9: `d3d9.dll` in the engine DLL's strings; a DirectX redistributable ships in `DirectX\` `[inferred-static 2026-09-13]`.
-- Developer console / cvar system present? how opened?: not yet investigated.
+- 32/64-bit, size, module base, ASLR behaviour (stable base? relocations?): **32-bit** `[inferred-static 2026-09-14]`.
+  - `prototypef.exe` 2.5 MB — base `0x400000`, ASLR off, relocations stripped. Its `.text` is **7 KB**; the rest is `.rsrc` (2.2 MB) and the Steam DRM `.bind` section. A stub, nothing more.
+  - `prototypeenginef.dll` 20.2 MB — base `0x10000000`, ASLR off, **relocations present**. `.text` is **14.2 MB**. Plain sections only: **no wrapper, no packer**.
+  - ⭐ **The friendliest protection shape in the 2026-09-13 batch:** the Steam wrapper sits on a 7 KB stub that only starts the game, while **all 14 MB of real code is in a completely unprotected DLL**, readable statically today with no unpacking step and no running process. Dead Space 2's code is behind a wrapper; Prototype's is not.
+  - ⚠️ ASLR is off but relocations are present, so Windows *may* still move the DLL. Confirm once rather than assume.
+- Renderer API (D3D11/12, DXGI, GL, Vulkan) with evidence: **Direct3D 9, confirmed from the import table** (not just strings): `d3d9.dll → Direct3DCreate9` in `prototypeenginef.dll` `[inferred-static 2026-09-14]`. ⚠️ Note it does **not** import `d3dx9_*`, so unlike Hard Reset and Dead Space 2 there is no `D3DXGetShaderConstantTable` route to named shader constants here. A DirectX redistributable ships in `DirectX\\`.
+- Developer console / cvar system present? how opened?: **A console subsystem exists as a class** — `engine::ConsoleManager`, `engine::ConsoleManagerPeer`, `ConsoleManager::Callback` with a callback list, and a `ConsoleAspectRatio` setting `[inferred-static 2026-09-14]`. ⚠️ **Whether a player can open it is a completely separate question and nothing found answers it** — no key binding, no cvar registry, no help text of the kind Hard Reset carries. Also present: `Proto_Profile_BodySurfCheatEnabled`, a cheat flag stored in the player profile.
 
 ## 4. DRM / anti-debug & injection foothold
 - DRM (CEG/Denuvo/GOG/none); launch-time-debugger behaviour: The launcher stub carries the Steam DRM wrapper section (`.bind`); the engine DLL itself shows no protection `[inferred-static 2026-09-13]`. Not tested live.
@@ -67,4 +74,7 @@
 - none yet.
 
 ## 12. Open risks toward the North Star
-- Nothing blocking seen yet. Because the real code sits in an unprotected DLL, static reading should be straightforward.
+- Nothing blocking seen yet. Because the real code sits in an unprotected DLL, static reading should be straightforward — and 2026-09-14 confirmed that from the PE headers rather than assuming it.
+- ⭐ **`proto::CameraManager` is the best camera shape in the batch.** The binary is full of bound closures over it — `Closure1<CameraManager, void, float>`, `Closure2<CameraManager, bool, int, math::Vector>`, `Closure5<CameraManager, void, float, float, float, math::Vector, math::Vector>`, `Closure6<CameraManager, bool, int, LuaGOH, const char*, math::Vector, int, bool>` `[inferred-static 2026-09-14]`. A single named class owning the camera and taking `math::Vector` arguments means camera state most likely lives in **one object** rather than smeared across the renderer. It is the opposite of Dead Space 2's bone-bound camera picture.
+- ⭐ **`engine::LuaGOH` appears inside `CameraManager` closures** — a game-object handle passed to a camera call is script-facing by construction, so **Lua can probably reach the camera** `[hypothesis]`.
+- ⚠️ **Every claim above comes from names, not from disassembly.** Names prove a thing exists and prove nothing about what it does. No code was read; nothing was run.
