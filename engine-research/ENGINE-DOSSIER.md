@@ -88,6 +88,12 @@ The busiest upload, `c0+5` (start 0, five registers), is the **per-object fused 
 - **Game cameras:** `engine::camera::Camera` (vtable `0x10e70e00`, +0x14 → its pure3d::Camera); proto::CameraManager has no vtable (reached via Lua bindings near `0x10332380`; +0x1c ChaseCamera; ChaseCamera +0xc74/+0xc78 current/target FOV).
 - **What it suggests:** head tracking = change cam+0x90 at/just before `SetupCamera` (or hook `SetTransform`); stereo = the engine's own lens shift plus an eye offset on cam+0x90, a native asymmetric frustum `[hypothesis]`, needs one live poke.
 - Reader scripts (CTAB parser, .rcf reader, xref helpers): `staging/prototype-vr/reader-2026-09-29/`.
+- **The rendered camera has no fixed global chain** (folded from `inbox/2026-09-29-lm-reader-scene-camera-chain.md`, `[inferred-static]`): it travels per frame in a render request. `pure3d::ViewPass::Render` `0x10768670` (vtable `0x10e5f6bc`) → `0x107545a0(View = ViewPass+0xbc, cam)` → `View::SetCamera` `0x1073a300` (View+0x18 = cam) → `SetupCamera` builds view = Invert(cam+0x90 × View+0x2c).
+  - **Best test route:** a 5-byte detour at `0x107545a0` (prologue `8B 44 24 08 | 56 | 8B 74 24 08`), args `[esp+4]` View, `[esp+8]` Camera; filter on return address `0x10768738` and near 0.3 / far 7500. A pose written into cam+0x90 there takes effect the same frame.
+  - **Cleaner head-pose slot: View+0x2c**, a per-View 4×4 set to identity in the View constructor `0x1073a260`, multiplied with cam+0x90 in SetupCamera, never written by camera code — worth one memory poke (order and "nothing rewrites it" are `[hypothesis]`).
+  - **Read-only memory walk:** scan for ViewPass vtable `0x10e5f6bc` → [+0xbc] View (vtable `0x10e5da10`) → [View+0x18] Camera (vtable `0x10e54e94`), pick near 0.3 / far 7500. ⚠️ Poking cam+0x90 from outside is overwritten by `SetTransform`; poke View+0x2c instead.
+  - ViewPass+0xd0 picks one of a list of cameras (request+0x24, 12-byte entries): a native multi-camera mechanism, a possible stereo route `[hypothesis]`.
+  - All engine cameras register in a slot table at `*(0x11283258)` (+0x10 array, +0x1c highest slot); each `engine::camera::Camera` has its pure3d::Camera at +0x14. Says nothing about which is rendered.
 
 ## ⚠️ CORRECTION to the static reading below: it is a PURE PROJECTION, not a fused WVP
 
