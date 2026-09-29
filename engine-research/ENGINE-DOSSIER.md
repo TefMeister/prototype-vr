@@ -77,6 +77,18 @@ unlike Dead Space 2's non-standard one. Per-eye derivations can use the standard
 
 The busiest upload, `c0+5` (start 0, five registers), is the **per-object fused world-view-projection**, rows = the object's axes, columns 2 and 3 = z and w, fifth register `(1,0,0,0)`; its rotation part changes when the camera turns and is identical while it is still `[verified-live 2026-09-29, n=1 session, 44 bursts]`. So the static reading (`p3dWorldViewProjectionMatrix : register(c0)`) was right for world draws, and the 2026-09-14 correction was right for the `c0+4` camera write only. Stereo: a clip-space shift still works on a fused matrix. Head tracking: must go in where the camera is built (CameraManager), not in a view register. The `c0+4` block's `[14]` term also moved with the turns (373 → 330 → 282), so "pure projection" there is `[hypothesis]` again. Note: `modding-notes/2026-09-29-c05-is-the-fused-camera-transform.md`.
 
+## ⭐ 2026-09-29 (/lm reader, static) — HOW THE CAMERA REACHES THE GPU
+
+*Folded from `inbox/2026-09-29-lm-reader-camera-manager.md`. Offsets are VAs in `prototypeenginef.dll` (base 0x10000000); everything below is `[inferred-static]` unless tagged.*
+
+- **The real shaders:** `rt\startup_shaders.p3d.rz` in `art.rcf` (685 VS + 685 PS; `.rz` = 16-byte header + zlib). 632 VS put `p3dWorldViewProjectionMatrix` at c0-c3 and `p3dWorldMatrix` at c4-c7; 53 (sky, vehicles, water) swap them. **No gameplay VS takes a separate view or projection** `[measured 2026-09-29, n=685]`. ⚠️ So editing c0 blindly breaks sky/vehicles/water: parse each shader's CTAB and track its WVP register.
+- **Uploads are dirty-window flushes:** the main path (`0x10629330`, flush `0x10629875`) keeps a shadow register file and uploads min..max changed registers before each draw. **`c0+5` = c0..c4 changed (WVP + the first row of World); `c0+4` = only the WVP changed** — which fits the live log, where c4 was always (1,0,0,0) `[verified-live 2026-09-29]`. The "pure projection" at c0 is most likely the WVP of draws whose world×view has no rotation `[hypothesis]`. Other sites: `0x106289e0` (second flush), `0x10621348` (direct c0 = obj×View×Proj), `0x106229f8` (bones, 3 regs/bone from c105).
+- **pure3d::Camera** (vtable `0x10e54e94`): +0x14 hFOV rad, +0x18 vFOV, +0x1c aspect, +0x20 near, +0x24 far, +0x50 view (world→camera), +0x90 camera→world, +0xe8/+0xec lens shift X/Y (off-centre frustum). **`SetTransform` = `0x106dce40`** writes +0x90 and inverts into +0x50; all 28 callers use it. **`pure3d::View::SetupCamera` = `0x1073a490`** → `SetPerspective` `0x10615570` (builder `0x10620c90`, off-centre LH) and `SetViewMatrix` `0x10615390`.
+- **dxContext** `*(0x1127f354)`: +0x15c View, +0x1a4 World, +0x1ec Projection, +0x234 WorldView, +0x30c WVP (lazy).
+- **Game cameras:** `engine::camera::Camera` (vtable `0x10e70e00`, +0x14 → its pure3d::Camera); proto::CameraManager has no vtable (reached via Lua bindings near `0x10332380`; +0x1c ChaseCamera; ChaseCamera +0xc74/+0xc78 current/target FOV).
+- **What it suggests:** head tracking = change cam+0x90 at/just before `SetupCamera` (or hook `SetTransform`); stereo = the engine's own lens shift plus an eye offset on cam+0x90, a native asymmetric frustum `[hypothesis]`, needs one live poke.
+- Reader scripts (CTAB parser, .rcf reader, xref helpers): `staging/prototype-vr/reader-2026-09-29/`.
+
 ## ⚠️ CORRECTION to the static reading below: it is a PURE PROJECTION, not a fused WVP
 
 The shipped shader source (below) declares `p3dWorldViewProjectionMatrix : register( c0 )`, and this
