@@ -163,6 +163,7 @@ p3dPositionWorldViewProjection = mul( world_view_proj_matrix, position );
 | | | |
 
 ## 10. Autonomous harness recipe (this game)
+- **Windowed 1280×720: launch options `windowed width=1280 height=720`** (Steam → Properties → Launch Options) `[verified-live 2026-09-29, n=1]`. Found by trying spellings of the plain strings `windowed`/`width`/`height`/`borderless` in `prototypef.exe` (the exe is packed, so they have no static references). ⚠️ `windowed` must have NO dash: `-windowed` is ignored, and `-width 1280 -height 720` then switches the WHOLE DESKTOP to 1280×720 fullscreen (Tefa saw it; measured: screen 1280×720). `windowed` alone gives an 800×450 window. The window is borderless at the top-left (style 0x94080008), title `[PROTOTYPE…]`. No settings file or registry key holds display settings (`Documents\Prototype` has only `slot-A/B.bin`).
 - Launch to a known scene (commands used):
 - In-process input / camera drive method that worked:
 - Frame-capture method; where images land:
