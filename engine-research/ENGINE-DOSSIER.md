@@ -73,6 +73,10 @@ unlike Dead Space 2's non-standard one. Per-eye derivations can use the standard
 **Eight fields of view, all at exactly 16:9** - 80.00 (normal), 60.80, 44.24, 42.73, 35.67, 32.70,
 20.51, 19.76 deg. One camera with a zoom ladder, not eight cameras.
 
+## ⭐ 2026-09-29: BOTH ARE TRUE — the camera's own write is a projection, every object's draw is a fused WVP
+
+The busiest upload, `c0+5` (start 0, five registers), is the **per-object fused world-view-projection**, rows = the object's axes, columns 2 and 3 = z and w, fifth register `(1,0,0,0)`; its rotation part changes when the camera turns and is identical while it is still `[verified-live 2026-09-29, n=1 session, 44 bursts]`. So the static reading (`p3dWorldViewProjectionMatrix : register(c0)`) was right for world draws, and the 2026-09-14 correction was right for the `c0+4` camera write only. Stereo: a clip-space shift still works on a fused matrix. Head tracking: must go in where the camera is built (CameraManager), not in a view register. The `c0+4` block's `[14]` term also moved with the turns (373 → 330 → 282), so "pure projection" there is `[hypothesis]` again. Note: `modding-notes/2026-09-29-c05-is-the-fused-camera-transform.md`.
+
 ## ⚠️ CORRECTION to the static reading below: it is a PURE PROJECTION, not a fused WVP
 
 The shipped shader source (below) declares `p3dWorldViewProjectionMatrix : register( c0 )`, and this
@@ -163,6 +167,7 @@ p3dPositionWorldViewProjection = mul( world_view_proj_matrix, position );
 | | | |
 
 ## 10. Autonomous harness recipe (this game)
+- Menus: `ai-game-control-profiles/routes/prototype/launch_to_gameplay.json` (closed game → Alex in the alley, ~62 s, n=4). Quit: `quit_to_desktop.json` (Esc, Down×5, Enter, Down×2, Enter, Down, Enter). **Restore Checkpoint** on the pause menu's QUIT page returns Alex to the start spot without a restart `[verified-live 2026-09-29]`. The mouse turns the camera (`move_o_matic.py turn`, 250 px ≈ a clear turn).
 - **Windowed 1280×720: launch options `windowed width=1280 height=720`** (Steam → Properties → Launch Options) `[verified-live 2026-09-29, n=1]`. Found by trying spellings of the plain strings `windowed`/`width`/`height`/`borderless` in `prototypef.exe` (the exe is packed, so they have no static references). ⚠️ `windowed` must have NO dash: `-windowed` is ignored, and `-width 1280 -height 720` then switches the WHOLE DESKTOP to 1280×720 fullscreen (Tefa saw it; measured: screen 1280×720). `windowed` alone gives an 800×450 window. The window is borderless at the top-left (style 0x94080008), title `[PROTOTYPE…]`. No settings file or registry key holds display settings (`Documents\Prototype` has only `slot-A/B.bin`).
 - Launch to a known scene (commands used):
 - In-process input / camera drive method that worked:
