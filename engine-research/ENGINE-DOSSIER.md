@@ -98,6 +98,26 @@ The busiest upload, `c0+5` (start 0, five registers), is the **per-object fused 
     `[verified-numerically 2026-09-30]`. Default writes all three Views (only one showed a change live); numpad 0
     narrows it. `dev-archive/tools/proxy-d3d9/src/headpose.c`; note
     `modding-notes/2026-09-30-pd-the-head-pose-writer-is-built.md`.
+  - **⭐ 2026-09-30 (`/lm`, live): THE PER-FRAME WRITER WORKS.** Installed, it found the three scene Views and turned
+    the picture 10° on the spot: the gate moved ~135 px against 134 predicted for 80° hFOV; the HUD stayed put; after a
+    mouse turn and after walking forward the same turn still sat on top of the game camera
+    `[verified-live 2026-09-30, n=1 each]`. **The on-screen View is the second one first seen** (pose on #1 or #3 alone
+    = no change; #2 alone = same as all three) `[verified-live 2026-09-30, n=1]`. First build's pitch sign was flipped
+    (numpad 8 looked down); fixed, then numpad 8 looks up `[verified-live 2026-09-30, n=1]`.
+  - **The three ViewPasses** (reader, from the scheme builder `0x1071a000`, `[inferred-static 2026-09-30]`):
+    "Prototype Visibility" (+0xdc = 1, frustum culling, parent of Fog and View Pass), **"View Pass"** (+0xdd = 1,
+    +0xb4 = -1, all world drawing; = the live #2), "Prototype FB View Pass" (radial blur). Names at ViewPass+0x8.
+    ⚠️ **Correction:** ViewPass+0xbc is a POINTER to a heap View, not an embedded one. The ViewPass is in ECX at the
+    hook (every caller does `mov ecx, esi`), so a naked stub could pick "View Pass" by name without trial. The other
+    two callers of 0x107545a0 are `pure3d::SelectPass` (picking, `0x107C0F48`) and `pure3d::DebugPass`
+    (`0x107C4CE5`); the return-address filter skips both. Writing the pose into all three is safe: culling builds its
+    planes from cam+0x90 (`0x106dcc00`), not View+0x2c. ⚠️ So culling follows the BODY camera: a head turned far
+    may show pop-in at the screen edges `[hypothesis]`.
+  - **HUD world markers ignore the head pose** — the objective arrow stayed at its screen spot while the scene turned
+    `[verified-live 2026-09-30, n=2]`. Reader: the FEMarker placer `0x104d62a0` projects with the game camera's
+    **cam+0x50** via `0x106dcf50` (WorldToScreen-like) and `0x106dcd70` (on-screen test), never View+0x2c
+    `[inferred-static 2026-09-30]`. Fix route: hook those two and project `p·inv(C)·inv(H)·C` for the scene camera
+    `[hypothesis]`; four more callers of `0x106dcf50` (probably reticle and name tags) are unidentified.
   - **Cleaner head-pose slot: View+0x2c**, a per-View 4×4 set to identity in the View constructor `0x1073a260`, multiplied with cam+0x90 in SetupCamera, never written by camera code — worth one memory poke (order and "nothing rewrites it" are `[hypothesis]`).
   - **Read-only memory walk:** scan for ViewPass vtable `0x10e5f6bc` → [+0xbc] View (vtable `0x10e5da10`) → [View+0x18] Camera (vtable `0x10e54e94`), pick near 0.3 / far 7500. ⚠️ Poking cam+0x90 from outside is overwritten by `SetTransform`; poke View+0x2c instead.
   - ViewPass+0xd0 picks one of a list of cameras (request+0x24, 12-byte entries): a native multi-camera mechanism, a possible stereo route `[hypothesis]`.
@@ -196,6 +216,7 @@ p3dPositionWorldViewProjection = mul( world_view_proj_matrix, position );
 - **Controls (default keyboard + mouse, read off the game's own page 2026-09-29):** W/S/A/D move, Space jump, Shift sprint, Ctrl walk, mouse look (SLOW-8, no invert), LMB attack/throw, RMB special, E grab, R power menu, 1-4 last powers, ` web of intrigue, F disguise powers, Tab target, X default camera, **F1-F11 are powers** (disguise, Alex form, claws, hammerfist, musclemass, whipfist, blade, thermal, infected vision, armor, shield). **The number pad is unbound**, so mod hotkeys go there. Route `launch_to_keybindings.json` re-reads the page in 65 s; the list is stored in the route's `controls`.
 - Menus: `ai-game-control-profiles/routes/prototype/launch_to_gameplay.json` (closed game → Alex in the alley, ~62 s, n=4). Quit: `quit_to_desktop.json` (Esc, Down×5, Enter, Down×2, Enter, Down, Enter). **Restore Checkpoint** on the pause menu's QUIT page returns Alex to the start spot without a restart `[verified-live 2026-09-29]`. The mouse turns the camera (`move_o_matic.py turn`, 250 px ≈ a clear turn).
 - **Windowed 1280×720: launch options `windowed width=1280 height=720`** (Steam → Properties → Launch Options) `[verified-live 2026-09-29, n=1]`. Found by trying spellings of the plain strings `windowed`/`width`/`height`/`borderless` in `prototypef.exe` (the exe is packed, so they have no static references). ⚠️ `windowed` must have NO dash: `-windowed` is ignored, and `-width 1280 -height 720` then switches the WHOLE DESKTOP to 1280×720 fullscreen (Tefa saw it; measured: screen 1280×720). `windowed` alone gives an 800×450 window. The window is borderless at the top-left (style 0x94080008), title `[PROTOTYPE…]`. No settings file or registry key holds display settings (`Documents\Prototype` has only `slot-A/B.bin`).
+- **Music OFF** (2026-09-30): pause menu (Esc) → OPTIONS → AUDIO → MUSIC, left until the slider handle disappears (the leftmost lit step is NOT zero; one more Left is), then Esc → SAVE. Stored in `Documents\Prototype\profile.bin` (binary; backed up beside it as `profile.bin.backup-2026-09-30-before-music-mute`) `[verified-live 2026-09-30, n=1]`. ⚠️ The main menu remembers its last row: after a quit it opens on QUIT, so the launch route stops at its NEW checkpoint; press Up to CONTINUE, then `run --from 9`.
 - Launch to a known scene (commands used):
 - In-process input / camera drive method that worked:
 - Frame-capture method; where images land:

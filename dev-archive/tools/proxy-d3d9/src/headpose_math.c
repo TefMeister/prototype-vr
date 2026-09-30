@@ -47,9 +47,10 @@ static void mul4(const double a[16], const double b[16], double o[16]) {
 }
 
 void headpose_matrix(const HeadPose *h, double out[16]) {
-    /* pitch about the camera's x, then yaw about its y, then the offset; row vectors */
+    /* pitch about the camera's x, then yaw about its y, then the offset; row vectors. Positive pitch looks UP:
+     * the first build had the sign the other way and numpad 8 looked down (seen live 2026-09-30). */
     double cp = cos(h->pitch_rad), sp = sin(h->pitch_rad), cy = cos(h->yaw_rad), sy = sin(h->yaw_rad);
-    double rx[16] = {1, 0, 0, 0,  0, cp, sp, 0,  0, -sp, cp, 0,  0, 0, 0, 1};
+    double rx[16] = {1, 0, 0, 0,  0, cp, -sp, 0,  0, sp, cp, 0,  0, 0, 0, 1};
     double ry[16] = {cy, 0, -sy, 0,  0, 1, 0, 0,  sy, 0, cy, 0,  0, 0, 0, 1};
     mul4(rx, ry, out);
     out[12] = h->x_m;
