@@ -44,6 +44,7 @@ void log_msg(const char *fmt, ...);     /* proxy.c */
 #define KEY_POLL_MS         30u
 #define MAX_VIEWS           8
 #define PATCH_LEN           5
+#define OPCODE_JMP_REL32    0xE9          /* x86 jmp with a 32-bit relative target, 5 bytes in all       */
 static const uint8_t EXPECTED_PROLOGUE[PATCH_LEN] = {0x8B, 0x44, 0x24, 0x08, 0x56};  /* mov eax,[esp+8]; push esi */
 
 /* ---- State ---------------------------------------------------------------------------------------- */
@@ -136,8 +137,8 @@ static void __stdcall hook_set_camera(void *view, void *cam) {
 }
 
 static void write_jump(uint8_t *at, const void *to) {
-    int32_t rel = (int32_t)((uintptr_t)to - ((uintptr_t)at + 5));
-    at[0] = 0xE9;
+    int32_t rel = (int32_t)((uintptr_t)to - ((uintptr_t)at + PATCH_LEN));
+    at[0] = OPCODE_JMP_REL32;
     memcpy(at + 1, &rel, 4);
 }
 
