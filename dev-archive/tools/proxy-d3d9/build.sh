@@ -1,5 +1,5 @@
 #!/bin/bash
-# Builds the 32-bit d3d9.dll proxy for Dead Space 2 (deadspace2.exe is PE32/i386).
+# Builds the 32-bit d3d9.dll proxy for Prototype (prototypef.exe is PE32/i386); first written for Dead Space 2.
 # Run from Git Bash. Needs llvm-mingw (i686-w64-mingw32-clang) on PATH.
 #
 # Recipe copied from staging/alan-wake-vr/proxy-d3d9/build.sh, including its
@@ -27,7 +27,7 @@ mkdir -p build
 # silently cannot work. Four projects have been found with this defect.
 "$CC" -shared -O2 -Wall -Wextra \
     -o build/d3d9.dll \
-    src/proxy.c src/thunks.c src/camhunt.c src/wrap_d3d9.c src/d3d9.def \
+    src/proxy.c src/thunks.c src/camhunt.c src/wrap_d3d9.c src/headpose.c src/headpose_math.c src/d3d9.def \
     -Wl,--no-insert-timestamp \
     -luser32 -lkernel32 -ldxguid -luuid
 
