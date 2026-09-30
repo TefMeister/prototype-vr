@@ -36,46 +36,14 @@ void log_msg(const char *fmt, ...);     /* proxy.c */
 static const uint8_t MARKER_PROLOGUE[MARKER_PATCH_LEN] = {0x83, 0xEC, 0x0C, 0x56, 0x8B, 0xF1};
 
 /* ---- maths ---------------------------------------------------------------------------------------- */
-static int invert4(const double a[16], double out[16]) {
-    double t[4][8];
-    for (int i = 0; i < 4; i++)
-        for (int j = 0; j < 8; j++) t[i][j] = j < 4 ? a[4 * i + j] : (j - 4 == i);
-    for (int c = 0; c < 4; c++) {
-        int p = c;
-        for (int r = c + 1; r < 4; r++)
-            if (fabs(t[r][c]) > fabs(t[p][c])) p = r;
-        if (fabs(t[p][c]) < 1e-9) return 0;
-        for (int j = 0; j < 8; j++) { double x = t[c][j]; t[c][j] = t[p][j]; t[p][j] = x; }
-        double d = t[c][c];
-        for (int j = 0; j < 8; j++) t[c][j] /= d;
-        for (int r = 0; r < 4; r++) {
-            if (r == c) continue;
-            double k = t[r][c];
-            for (int j = 0; j < 8; j++) t[r][j] -= k * t[c][j];
-        }
-    }
-    for (int i = 0; i < 4; i++)
-        for (int j = 0; j < 4; j++) out[4 * i + j] = t[i][4 + j];
-    return 1;
-}
-
-static void mul4(const double a[16], const double b[16], double o[16]) {
-    for (int i = 0; i < 4; i++)
-        for (int j = 0; j < 4; j++) {
-            double s = 0;
-            for (int k = 0; k < 4; k++) s += a[4 * i + k] * b[4 * k + j];
-            o[4 * i + j] = s;
-        }
-}
-
 int headpose_marker_matrix(const float cam_to_world[16], const HeadPose *h, double out[16]) {
     double c[16], ci[16], hm[16], hi[16], t[16];
     for (int i = 0; i < 16; i++) c[i] = cam_to_world[i];
-    if (!invert4(c, ci)) return 0;
+    if (!headpose_invert4(c, ci)) return 0;
     headpose_matrix(h, hm);
-    if (!invert4(hm, hi)) return 0;
-    mul4(ci, hi, t);
-    mul4(t, c, out);
+    if (!headpose_invert4(hm, hi)) return 0;
+    headpose_mul4(ci, hi, t);
+    headpose_mul4(t, c, out);
     return 1;
 }
 

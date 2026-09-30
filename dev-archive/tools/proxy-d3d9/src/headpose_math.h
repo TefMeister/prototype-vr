@@ -14,4 +14,8 @@ void headpose_matrix(const HeadPose *h, double out[16]);
  * cannot be inverted. */
 int headpose_slot(const float cam_to_world[16], const HeadPose *h, float slot_out[16]);
 
+/* 4x4 helpers shared with headpose_markers.c (row-major doubles). invert returns 0 on a singular matrix. */
+int headpose_invert4(const double a[16], double out[16]);
+void headpose_mul4(const double a[16], const double b[16], double o[16]);
+
 #endif

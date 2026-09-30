@@ -14,7 +14,7 @@
 #define MUTANT 0
 #endif
 
-static int invert4(const double a[16], double out[16]) {
+int headpose_invert4(const double a[16], double out[16]) {
     double t[4][8];
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 8; j++) t[i][j] = j < 4 ? a[4 * i + j] : (j - 4 == i);
@@ -37,7 +37,7 @@ static int invert4(const double a[16], double out[16]) {
     return 1;
 }
 
-static void mul4(const double a[16], const double b[16], double o[16]) {
+void headpose_mul4(const double a[16], const double b[16], double o[16]) {
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++) {
             double s = 0;
@@ -52,7 +52,7 @@ void headpose_matrix(const HeadPose *h, double out[16]) {
     double cp = cos(h->pitch_rad), sp = sin(h->pitch_rad), cy = cos(h->yaw_rad), sy = sin(h->yaw_rad);
     double rx[16] = {1, 0, 0, 0,  0, cp, -sp, 0,  0, sp, cp, 0,  0, 0, 0, 1};
     double ry[16] = {cy, 0, -sy, 0,  0, 1, 0, 0,  sy, 0, cy, 0,  0, 0, 0, 1};
-    mul4(rx, ry, out);
+    headpose_mul4(rx, ry, out);
     out[12] = h->x_m;
     out[13] = h->y_m;
     out[14] = h->z_m;
@@ -61,14 +61,14 @@ void headpose_matrix(const HeadPose *h, double out[16]) {
 int headpose_slot(const float cam_to_world[16], const HeadPose *h, float slot_out[16]) {
     double c[16], ci[16], hm[16], t[16], s[16];
     for (int i = 0; i < 16; i++) c[i] = cam_to_world[i];
-    if (!invert4(c, ci)) return 0;
+    if (!headpose_invert4(c, ci)) return 0;
     headpose_matrix(h, hm);
 #if MUTANT == 1 /* mutant: the raw pose, no conjugation (what orbited the world origin live) */
     memcpy(s, hm, sizeof s);
     (void)t;
 #else
-    mul4(ci, hm, t);
-    mul4(t, c, s);
+    headpose_mul4(ci, hm, t);
+    headpose_mul4(t, c, s);
 #endif
     for (int i = 0; i < 16; i++) slot_out[i] = (float)s[i];
     return 1;
