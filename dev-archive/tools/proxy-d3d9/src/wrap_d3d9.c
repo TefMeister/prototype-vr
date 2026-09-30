@@ -51,6 +51,7 @@
 #include <d3d9.h>
 #include <stddef.h>
 #include "camhunt.h"
+#include "headpose.h"
 
 void log_msg(const char *fmt, ...);     /* proxy.c */
 
@@ -193,6 +194,7 @@ static HRESULT STDMETHODCALLTYPE W_CreateDevice(IDirect3D9 *This, UINT Adapter, 
     if (SUCCEEDED(hr) && ppDevice && *ppDevice) {
         if (pp) camhunt_set_display(pp->BackBufferWidth, pp->BackBufferHeight);
         camhunt_install(*ppDevice, g_real_d3d9_mod);
+        headpose_install();                       /* the engine DLL is loaded by now */
     }
     else
         log_msg("  no device produced - the camera instrument cannot install");
