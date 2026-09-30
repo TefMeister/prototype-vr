@@ -41,6 +41,23 @@ the game. It hooks the call where each ViewPass hands its camera to its View, an
 - Culling uses the body camera, so a head turned far past the flat view may show pop-in at the edges `[hypothesis]`.
 - Reflections under a moved head.
 
+## The markers now follow the head too
+
+The reader traced the markers to the camera's own `WorldToScreen` (`0x106dcf50`) and sphere test (`0x106dcd70`), both
+using `cam+0x50`, and checked the fix numerically: hand them `p·inv(C)·inv(H)·C` instead of `p` (5,000 checks, 0
+failures, both mutants fail). Built in as `src/headpose_markers.c` (6-byte patches, prologues checked on disk; the
+combined matrix is cached because the sphere test runs per object), with our own test (3,000 checks, worst 0.23 mm)
+and numpad `.` to switch it off and on. Installed `a88959ab5347`.
+
+Live, turned 10°: with the fix on, the objective arrow sits over the gate; switched off, it jumps back to its old
+screen spot beside it `[verified-live 2026-09-30, n=1 toggle]`. In ~27 s it moved 1,640 marker points and 2.2
+million culling tests to the head, with nothing visibly broken. Because the sphere test is the scene camera's general
+culling, culling now follows the head as well, which should also stop the edge pop-in `[hypothesis]`.
+
+Pictures and the `HEADPOSE` log lines: `dev-archive/recon/2026-09-30-head-pose-live/`.
+
+⚠️ The menu tool has no name for numpad `.` (scancode 0x53); it was sent directly this time.
+
 ## Next
 
-Make the markers follow the head (hook `0x106dcf50` / `0x106dcd70`, reader's design), then feed H from the headset.
+Feed H from the headset. Identify the five other callers of `0x106dcf50` (reticle, name tags?) and check them in game.

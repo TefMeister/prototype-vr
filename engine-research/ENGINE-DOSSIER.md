@@ -118,6 +118,11 @@ The busiest upload, `c0+5` (start 0, five registers), is the **per-object fused 
     **cam+0x50** via `0x106dcf50` (WorldToScreen-like) and `0x106dcd70` (on-screen test), never View+0x2c
     `[inferred-static 2026-09-30]`. Fix route: hook those two and project `p·inv(C)·inv(H)·C` for the scene camera
     `[hypothesis]`; four more callers of `0x106dcf50` (probably reticle and name tags) are unidentified.
+  - **⭐ FIXED LIVE 2026-09-30:** `src/headpose_markers.c` hooks both (6-byte patch over `83 EC 0C | 56 | 8B F1`,
+    thiscall, `ret 8`) and hands them `p·inv(C)·inv(H)·C` for the scene camera; the arrow then sits over its target
+    under a 10° head turn and jumps back when switched off (numpad `.`) `[verified-live 2026-09-30, n=1 toggle]`.
+    Maths `[verified-numerically 2026-09-30, n=3000 + reader's n=5000]`. SphereVisible is general culling (16
+    callers), so the scene's culling now follows the head too.
   - **Cleaner head-pose slot: View+0x2c**, a per-View 4×4 set to identity in the View constructor `0x1073a260`, multiplied with cam+0x90 in SetupCamera, never written by camera code — worth one memory poke (order and "nothing rewrites it" are `[hypothesis]`).
   - **Read-only memory walk:** scan for ViewPass vtable `0x10e5f6bc` → [+0xbc] View (vtable `0x10e5da10`) → [View+0x18] Camera (vtable `0x10e54e94`), pick near 0.3 / far 7500. ⚠️ Poking cam+0x90 from outside is overwritten by `SetTransform`; poke View+0x2c instead.
   - ViewPass+0xd0 picks one of a list of cameras (request+0x24, 12-byte entries): a native multi-camera mechanism, a possible stereo route `[hypothesis]`.

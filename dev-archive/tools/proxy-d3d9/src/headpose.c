@@ -13,6 +13,7 @@
  *   4 / 6  turn left / right  (YAW_STEP_DEG)        8 / 2  look up / down (PITCH_STEP_DEG)
  *   1 / 3  move left / right  (MOVE_STEP_M)         7 / 9  move down / up (MOVE_STEP_M)
  *   5      back to no head pose                     0      which Views get the pose: all, then each alone
+ *   .      HUD markers and scene culling follow the head: off / on (headpose_markers.c)
  *
  * Which of the three Views is on screen is not known statically; every View seen is numbered in the
  * log the first time it appears, and numpad 0 narrows the pose to one of them to tell them apart.
@@ -23,6 +24,7 @@
 #include <math.h>
 #include "headpose.h"
 #include "headpose_math.h"
+#include "headpose_markers.h"
 
 void log_msg(const char *fmt, ...);     /* proxy.c */
 
@@ -76,8 +78,16 @@ static void log_pose(const char *why) {
             g_writes, g_skipped);
 }
 
+/* HeadPoseSource for headpose_markers.c: the pose the scene View is getting, if any. */
+static int current_pose(HeadPose *h) {
+    if (!g_active) return 0;
+    *h = g_pose;
+    return 1;
+}
+
 static void poll_keys(void) {
     static DWORD last;
+    static SHORT was_decimal;
     static SHORT was[10];
     static const struct { int vk; const char *what; } keys[10] = {
         {VK_NUMPAD0, "numpad 0: next View choice"}, {VK_NUMPAD1, "numpad 1: move left"},
@@ -110,6 +120,9 @@ static void poll_keys(void) {
         }
         was[k] = down;
     }
+    SHORT dec = (GetAsyncKeyState(VK_DECIMAL) & 0x8000) != 0;
+    if (dec && !was_decimal) headpose_markers_toggle();
+    was_decimal = dec;
 }
 
 static int is_scene_camera(void *cam) {
@@ -179,8 +192,10 @@ void headpose_install(void) {
     HMODULE engine = GetModuleHandleA(ENGINE_DLL);
     if (!engine) { log_msg("HEADPOSE: %s is not loaded - not installed", ENGINE_DLL); return; }
     uintptr_t delta = (uintptr_t)engine - ENGINE_STATIC_BASE;
-    if (headpose_install_at((void *)(VA_VIEW_SET_CAMERA + delta), VA_RENDER_RETURN + delta))
+    if (headpose_install_at((void *)(VA_VIEW_SET_CAMERA + delta), VA_RENDER_RETURN + delta)) {
+        headpose_markers_install(delta, current_pose);
         log_msg("HEADPOSE: installed on %p (engine at %p). Numpad 4/6 turn, 8/2 look, 1/3 and 7/9 move, 5 reset, "
                 "0 picks which View. Nothing is written until the first key.",
                 (void *)(VA_VIEW_SET_CAMERA + delta), (void *)engine);
+    }
 }
