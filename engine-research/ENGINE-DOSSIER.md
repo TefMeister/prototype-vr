@@ -123,6 +123,12 @@ The busiest upload, `c0+5` (start 0, five registers), is the **per-object fused 
     under a 10° head turn and jumps back when switched off (numpad `.`) `[verified-live 2026-09-30, n=1 toggle]`.
     Maths `[verified-numerically 2026-09-30, n=3000 + reader's n=5000]`. SphereVisible is general culling (16
     callers), so the scene's culling now follows the head too.
+  - **2026-10-01 (`/pd`): the other callers of `Camera::WorldToScreen` `0x106dcf50`**, named by nearby code only
+    `[inferred-static 2026-10-01, weak — no symbols]`: `0x102aa716` and `0x102ace05` in the lock-on targeting code
+    (next to `proto::LockOnTargetingBehaviour`); `0x102ae546` in target selection (distance / arc /
+    min-maxTargetCategory); `0x10112b7e` in combat code (throw, shield); `0x10918635` unidentified. So with the marker
+    fix on, **lock-on and target choice also use the head-posed camera** — in VR that means "target what you look
+    at", which may be wanted; one live check.
   - **Cleaner head-pose slot: View+0x2c**, a per-View 4×4 set to identity in the View constructor `0x1073a260`, multiplied with cam+0x90 in SetupCamera, never written by camera code — worth one memory poke (order and "nothing rewrites it" are `[hypothesis]`).
   - **Read-only memory walk:** scan for ViewPass vtable `0x10e5f6bc` → [+0xbc] View (vtable `0x10e5da10`) → [View+0x18] Camera (vtable `0x10e54e94`), pick near 0.3 / far 7500. ⚠️ Poking cam+0x90 from outside is overwritten by `SetTransform`; poke View+0x2c instead.
   - ViewPass+0xd0 picks one of a list of cameras (request+0x24, 12-byte entries): a native multi-camera mechanism, a possible stereo route `[hypothesis]`.
