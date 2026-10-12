@@ -53,6 +53,9 @@ void headpose_matrix(const HeadPose *h, double out[16]) {
     double rx[16] = {1, 0, 0, 0,  0, cp, -sp, 0,  0, sp, cp, 0,  0, 0, 0, 1};
     double ry[16] = {cy, 0, -sy, 0,  0, 1, 0, 0,  sy, 0, cy, 0,  0, 0, 0, 1};
     headpose_mul4(rx, ry, out);
+    if (h->has_rot)                   /* a full head rotation (headpose_xr_math.c) replaces yaw/pitch */
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++) out[4 * i + j] = h->rot[3 * i + j];
     out[12] = h->x_m;
     out[13] = h->y_m;
     out[14] = h->z_m;

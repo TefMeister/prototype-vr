@@ -240,3 +240,11 @@ p3dPositionWorldViewProjection = mul( world_view_proj_matrix, position );
 - ⭐ **`proto::CameraManager` is the best camera shape in the batch.** The binary is full of bound closures over it — `Closure1<CameraManager, void, float>`, `Closure2<CameraManager, bool, int, math::Vector>`, `Closure5<CameraManager, void, float, float, float, math::Vector, math::Vector>`, `Closure6<CameraManager, bool, int, LuaGOH, const char*, math::Vector, int, bool>` `[inferred-static 2026-09-14]`. A single named class owning the camera and taking `math::Vector` arguments means camera state most likely lives in **one object** rather than smeared across the renderer. It is the opposite of Dead Space 2's bone-bound camera picture.
 - ⭐ **`engine::LuaGOH` appears inside `CameraManager` closures** — a game-object handle passed to a camera call is script-facing by construction, so **Lua can probably reach the camera** `[hypothesis]`.
 - ⚠️ **Every claim above comes from names, not from disassembly.** Names prove a thing exists and prove nothing about what it does. No code was read; nothing was run.
+
+## 2026-10-12 (`/pd`, dev PC, no launch): the headset feeds the head pose
+- `prototype_headset.txt` next to the exe switches it on: our own thread runs OpenXR on its own D3D11 device (the
+  game is D3D9) and publishes the head each frame; it goes into View+0x2c exactly like the numpad pose. Mirrored
+  through z (OpenXR z back, this camera z forward); recentre on the first pose and numpad 5; tilt now possible
+  (`HeadPose.rot`). 20,010 checks against the proven key route and a quaternion route `[verified-numerically 2026-10-12]`;
+  the shipped code ran in a 32-bit program against the simulator: 2,270 poses, yaw +30 = forward 30 deg left
+  `[measured 2026-10-12, n=1]`. Not run in the game. Note: `modding-notes/2026-10-12-pd-the-headset-feeds-the-head-pose.md`.

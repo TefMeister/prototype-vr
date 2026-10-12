@@ -25,11 +25,12 @@ mkdir -p build
 # differently. CONVENTIONS.md tells a session to rebuild and compare the hash to
 # decide whether a deployed DLL is current, and without this flag that check
 # silently cannot work. Four projects have been found with this defect.
-"$CC" -shared -O2 -Wall -Wextra \
+"$CC" -shared -O2 -Wall -Wextra -Wno-missing-field-initializers \
     -o build/d3d9.dll \
-    src/proxy.c src/thunks.c src/camhunt.c src/wrap_d3d9.c src/headpose.c src/headpose_markers.c src/headpose_math.c src/d3d9.def \
+    src/proxy.c src/thunks.c src/camhunt.c src/wrap_d3d9.c src/headpose.c src/headpose_markers.c src/headpose_math.c src/headpose_xr.c src/headpose_xr_math.c src/d3d9.def \
+    -Ithird_party/openxr/include \
     -Wl,--no-insert-timestamp \
-    -luser32 -lkernel32 -ldxguid -luuid
+    -luser32 -lkernel32 -ldxguid -luuid -lversion
 
 echo "Built build/d3d9.dll"
 "$TOOLCHAIN/i686-w64-mingw32-objdump" -p build/d3d9.dll | sed -n '/Export Table/,/^$/p'

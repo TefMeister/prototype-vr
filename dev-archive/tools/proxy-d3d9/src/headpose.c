@@ -9,6 +9,9 @@
  *
  * Nothing is written until a head key is first pressed, so the game is untouched by default.
  *
+ * A HEADSET (2026-10-12, headpose_xr.c): while prototype_headset.txt sits next to the exe, the headset's head pose
+ * replaces the keys (numpad 5 then recentres); removing the file hands it back to the keys.
+ *
  * Keys (the number pad is unbound in this game; NumLock must be on):
  *   4 / 6  turn left / right  (YAW_STEP_DEG)        8 / 2  look up / down (PITCH_STEP_DEG)
  *   1 / 3  move left / right  (MOVE_STEP_M)         7 / 9  move down / up (MOVE_STEP_M)
@@ -25,6 +28,8 @@
 #include "headpose.h"
 #include "headpose_math.h"
 #include "headpose_markers.h"
+#include "headpose_xr.h"
+#include "jitterlog.h"           /* declarations only; the recorder lives in headpose_xr.c */
 
 void log_msg(const char *fmt, ...);     /* proxy.c */
 
@@ -55,6 +60,8 @@ static SetCameraFn g_trampoline;
 static uintptr_t   g_render_return;
 static HeadPose    g_pose;
 static int         g_active;            /* set by the first head key; nothing is written before it */
+static int         g_from_xr;           /* this frame's pose came from the headset (headpose_xr.c)  */
+static HeadPose    g_xr_pose;
 static int         g_target;            /* 0 = every View, k = only the k-th View seen             */
 static void       *g_views[MAX_VIEWS];
 static int         g_view_count;
@@ -80,6 +87,7 @@ static void log_pose(const char *why) {
 
 /* HeadPoseSource for headpose_markers.c: the pose the scene View is getting, if any. */
 static int current_pose(HeadPose *h) {
+    if (g_from_xr) { *h = g_xr_pose; return 1; }
     if (!g_active) return 0;
     *h = g_pose;
     return 1;
@@ -109,7 +117,7 @@ static void poll_keys(void) {
             case 2: g_pose.pitch_rad -= pitch; break;
             case 3: g_pose.x_m += MOVE_STEP_M; break;
             case 4: g_pose.yaw_rad -= yaw; break;
-            case 5: memset(&g_pose, 0, sizeof g_pose); break;
+            case 5: memset(&g_pose, 0, sizeof g_pose); if (g_from_xr) headpose_xr_recentre(); break;
             case 6: g_pose.yaw_rad += yaw; break;
             case 7: g_pose.y_m -= MOVE_STEP_M; break;
             case 8: g_pose.pitch_rad += pitch; break;
@@ -132,15 +140,20 @@ static int is_scene_camera(void *cam) {
 
 static void __stdcall hook_set_camera(void *view, void *cam) {
     if ((uintptr_t)__builtin_return_address(0) == g_render_return && view && cam && is_scene_camera(cam)) {
+        g_from_xr = headpose_xr_poll(&g_xr_pose);
         poll_keys();
         int number = view_number(view, cam);
-        if (g_active) {
+        if (g_active || g_from_xr) {
             static const HeadPose none;
-            const HeadPose *h = g_target == 0 || g_target == number ? &g_pose : &none;
+            const HeadPose *mine = g_from_xr ? &g_xr_pose : &g_pose;
+            const HeadPose *h = g_target == 0 || g_target == number ? mine : &none;
             float slot[16];
             if (headpose_slot((const float *)((char *)cam + OFF_CAM_TO_WORLD), h, slot)) {
                 memcpy((char *)view + OFF_VIEW_POSE, slot, sizeof slot);
                 g_writes++;
+                if (g_from_xr && h == mine)     /* jitter recorder: the camera just took the headset pose */
+                    jl_camera_ypr((float)(atan2(h->rot[6], h->rot[8]) * 57.29578), (float)(asin(h->rot[7]) * 57.29578),
+                                  (float)(atan2(-h->rot[3], h->rot[4]) * 57.29578), (float)h->x_m, (float)h->y_m, (float)h->z_m);
             } else {
                 g_skipped++;
             }
