@@ -17,7 +17,8 @@ part of this repository**; only code, notes, and tools we wrote ourselves.
 
 | Source / Work | Creator(s) | Link |
 |---|---|---|
-| *(none yet; engine research is just beginning)* | | |
+| OpenXR headers and loader (Apache-2.0 OR MIT) | The Khronos Group | https://github.com/KhronosGroup/OpenXR-SDK |
+| OpenXR Simulator (headset-free testing on the dev PC) | webhead2oo9 | https://github.com/webhead2oo9/OpenXR-Simulator |
 
 Development on this project is AI-assisted: much of the research, code, and
 documentation was produced with **Claude (Anthropic)**
