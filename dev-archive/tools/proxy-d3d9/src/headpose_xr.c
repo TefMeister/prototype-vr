@@ -306,33 +306,39 @@ static DWORD WINAPI xr_thread(LPVOID unused) {
 /* ---- Game thread ----------------------------------------------------------------------------------- */
 void headpose_xr_recentre(void) { InterlockedExchange(&g_recentre_req, 1); }
 
-int headpose_xr_poll(HeadPose *out) {
+/* The switch file appeared: face forward, and start the headset thread the first time. */
+static void switched_on(void) {
+    InterlockedExchange(&g_recentre_req, 1);                              /* every switch-on starts facing forward */
+    if (InterlockedCompareExchange(&g_stage, XR_LOADING, XR_OFF) != XR_OFF) return;
+    HANDLE t = CreateThread(NULL, 0, xr_thread, NULL, 0, NULL);
+    if (t) { CloseHandle(t); return; }
+    InterlockedExchange(&g_stage, XR_FAILED);
+    log_msg("XR: could not start the headset thread");
+}
+
+/* At most every XR_SWITCH_POLL_MS: has the switch file come or gone? */
+static void watch_switch_file(void) {
     static DWORD last;
+    char path[MAX_PATH];
     DWORD now = GetTickCount();
-    if (now - last >= XR_SWITCH_POLL_MS) {
-        char path[MAX_PATH];
-        last = now;
-        if (!g_dir[0]) {
-            GetModuleFileNameA(NULL, g_dir, MAX_PATH);
-            char *slash = strrchr(g_dir, '\\');
-            if (slash) *slash = 0;
-        }
-        _snprintf(path, MAX_PATH, "%s\\%s", g_dir, XR_SWITCH_FILE);
-        path[MAX_PATH - 1] = 0;
-        LONG want = GetFileAttributesA(path) != INVALID_FILE_ATTRIBUTES;
-        if (want != g_want) {
-            InterlockedExchange(&g_want, want);
-            log_msg("XR: %s %s", XR_SWITCH_FILE, want ? "found - the headset drives the head pose" : "removed - the number pad drives it again");
-            if (want) {
-                InterlockedExchange(&g_recentre_req, 1);                  /* every switch-on starts facing forward */
-                if (InterlockedCompareExchange(&g_stage, XR_LOADING, XR_OFF) == XR_OFF) {
-                    HANDLE t = CreateThread(NULL, 0, xr_thread, NULL, 0, NULL);
-                    if (t) CloseHandle(t);
-                    else { InterlockedExchange(&g_stage, XR_FAILED); log_msg("XR: could not start the headset thread"); }
-                }
-            }
-        }
+    if (now - last < XR_SWITCH_POLL_MS) return;
+    last = now;
+    if (!g_dir[0]) {
+        GetModuleFileNameA(NULL, g_dir, MAX_PATH);
+        char *slash = strrchr(g_dir, '\\');
+        if (slash) *slash = 0;
     }
+    _snprintf(path, MAX_PATH, "%s\\%s", g_dir, XR_SWITCH_FILE);
+    path[MAX_PATH - 1] = 0;
+    LONG want = GetFileAttributesA(path) != INVALID_FILE_ATTRIBUTES;
+    if (want == g_want) return;
+    InterlockedExchange(&g_want, want);
+    log_msg("XR: %s %s", XR_SWITCH_FILE, want ? "found - the headset drives the head pose" : "removed - the number pad drives it again");
+    if (want) switched_on();
+}
+
+int headpose_xr_poll(HeadPose *out) {
+    watch_switch_file();
     if (!g_want || g_stage != XR_RUNNING) return 0;
     for (int i = 0; i < XR_PUBLISH_TRIES; i++) {
         LONG s = g_seq;

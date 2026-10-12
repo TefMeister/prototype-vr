@@ -35,7 +35,7 @@
 
 ## Installed (not run in the game)
 
-`d3d9.dll` `3ecec32d9332` (rebuilds to the same hash), the 32-bit `openxr_loader.dll` (Khronos, from the Alan Wake
+`d3d9.dll` `4add1be4ade1` (rebuilds to the same hash), the 32-bit `openxr_loader.dll` (Khronos, from the Alan Wake
 staging copy) and `prototype_vr.ini`. No switch file, so the game behaves as before. The old dll is kept on E:.
 
 ## Not established
