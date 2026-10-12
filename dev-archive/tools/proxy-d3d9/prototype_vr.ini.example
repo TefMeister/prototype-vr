@@ -1,0 +1,6 @@
+; prototype_vr.ini - next to prototypef.exe. Read when prototype_headset.txt first appears (that file switches the headset on).
+[vr]
+; OpenXR runtime for this game only (empty = the system active runtime). Dev PC: the 32-bit simulator.
+RuntimeJson=D:\claude video game stuff\tools\OpenXR-Simulator\openxr_simulator-32.json
+; 1 = head movement moves the camera, 0 = turning only
+Position=1

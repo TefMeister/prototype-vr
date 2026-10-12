@@ -5,6 +5,8 @@
 typedef struct {
     double yaw_rad, pitch_rad;   /* turn about the camera's own up / right axes           */
     double x_m, y_m, z_m;        /* offset in the camera's own axes, metres               */
+    int has_rot;                 /* 1 = use rot[] instead of yaw/pitch (a headset: turn, look AND tilt) */
+    double rot[9];               /* rows = the head's right, up, forward in the camera's own axes      */
 } HeadPose;
 
 /* The head pose as a row-vector 4x4 (rotation, then the offset in the last row). */

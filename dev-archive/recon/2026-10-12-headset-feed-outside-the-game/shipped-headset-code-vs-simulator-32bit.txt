@@ -1,0 +1,63 @@
+  log: XR: prototype_headset.txt found - the headset drives the head pose
+  log: XR: headset thread started; head movement moves the camera
+  log: XR: no msvcp140.dll loaded yet - the runtime will bring its own
+  log: XR: step 1: runtime for this game only: D:\claude video game stuff\tools\OpenXR-Simulator\openxr_simulator-32.json
+  log: XR: step 2: xrCreateInstance ...
+  log: XR: steps 2-4 ok: instance, headset system, D3D11 requirements
+  log: XR: step 5: own D3D11 device ok (adapter matched)
+  log: XR: step 6: xrCreateSession ...
+  log: XR: session created; waiting for the runtime to start it
+  log: XR: session running
+  log: XR: RECENTRED: heading 0.0 deg is now forward
+  log: XR: head forward (-0.000 -0.000 1.000) in camera axes, offset +0.000 +0.000 -0.000 m | frames 1, poses 1
+t=  0.3 s  forward (-0.000 -0.000 +1.000)  up (+0.000 +1.000 -0.000)  offset +0.000 +0.000 -0.000 m
+t=  1.3 s  forward (-0.000 -0.000 +1.000)  up (+0.000 +1.000 -0.000)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (-0.000 -0.000 1.000) in camera axes, offset +0.000 +0.000 -0.000 m | frames 59, poses 59
+t=  2.3 s  forward (-0.000 -0.000 +1.000)  up (+0.000 +1.000 -0.000)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (-0.000 -0.000 1.000) in camera axes, offset +0.000 +0.000 -0.000 m | frames 119, poses 119
+t=  3.3 s  forward (-0.000 -0.000 +1.000)  up (+0.000 +1.000 -0.000)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (-0.000 -0.000 1.000) in camera axes, offset +0.000 +0.000 -0.000 m | frames 179, poses 179
+t=  4.3 s  forward (-0.000 -0.000 +1.000)  up (+0.000 +1.000 -0.000)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (-0.500 -0.000 0.866) in camera axes, offset +0.000 +0.000 -0.000 m | frames 239, poses 239
+t=  5.3 s  forward (-0.500 -0.000 +0.866)  up (+0.000 +1.000 -0.000)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (-0.500 -0.000 0.866) in camera axes, offset +0.000 +0.000 -0.000 m | frames 299, poses 299
+t=  6.3 s  forward (-0.500 -0.000 +0.866)  up (+0.000 +1.000 -0.000)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (-0.500 -0.000 0.866) in camera axes, offset +0.000 +0.000 -0.000 m | frames 359, poses 359
+t=  7.3 s  forward (-0.500 -0.000 +0.866)  up (+0.000 +1.000 -0.000)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (-0.500 -0.000 0.866) in camera axes, offset +0.000 +0.000 -0.000 m | frames 419, poses 419
+t=  8.3 s  forward (-0.500 -0.000 +0.866)  up (+0.000 +1.000 -0.000)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (-0.500 -0.000 0.866) in camera axes, offset +0.000 +0.000 -0.000 m | frames 479, poses 479
+t=  9.3 s  forward (-0.500 -0.000 +0.866)  up (+0.000 +1.000 -0.000)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (-0.500 -0.000 0.866) in camera axes, offset +0.000 +0.000 -0.000 m | frames 539, poses 539
+t= 10.3 s  forward (-0.500 -0.000 +0.866)  up (+0.000 +1.000 -0.000)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (-0.500 -0.000 0.866) in camera axes, offset +0.000 +0.000 -0.000 m | frames 600, poses 600
+t= 11.3 s  forward (-0.500 -0.000 +0.866)  up (+0.000 +1.000 -0.000)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (-0.500 -0.000 0.866) in camera axes, offset +0.000 +0.000 -0.000 m | frames 660, poses 660
+t= 12.3 s  forward (-0.500 -0.000 +0.866)  up (+0.000 +1.000 -0.000)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (-0.500 -0.000 0.866) in camera axes, offset +0.000 +0.000 -0.000 m | frames 720, poses 720
+t= 13.3 s  forward (-0.500 -0.000 +0.866)  up (+0.000 +1.000 -0.000)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (-0.500 -0.000 0.866) in camera axes, offset +0.000 +0.000 -0.000 m | frames 780, poses 780
+t= 14.3 s  forward (-0.500 -0.000 +0.866)  up (+0.000 +1.000 -0.000)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (-0.500 -0.000 0.866) in camera axes, offset +0.000 +0.000 -0.000 m | frames 840, poses 840
+t= 15.3 s  forward (+0.000 +0.342 +0.940)  up (-0.259 +0.908 -0.330)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (0.000 0.342 0.940) in camera axes, offset +0.000 +0.000 -0.000 m | frames 901, poses 901
+t= 16.3 s  forward (+0.000 +0.342 +0.940)  up (-0.259 +0.908 -0.330)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (0.000 0.342 0.940) in camera axes, offset +0.000 +0.000 -0.000 m | frames 961, poses 961
+t= 17.3 s  forward (+0.000 +0.342 +0.940)  up (-0.259 +0.908 -0.330)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (0.000 0.342 0.940) in camera axes, offset +0.000 +0.000 -0.000 m | frames 1021, poses 1021
+t= 18.3 s  forward (+0.000 +0.342 +0.940)  up (-0.259 +0.908 -0.330)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (0.000 0.342 0.940) in camera axes, offset +0.000 +0.000 -0.000 m | frames 1081, poses 1081
+t= 19.3 s  forward (+0.000 +0.342 +0.940)  up (-0.259 +0.908 -0.330)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (0.000 0.342 0.940) in camera axes, offset +0.000 +0.000 -0.000 m | frames 1141, poses 1141
+t= 20.3 s  forward (+0.000 +0.342 +0.940)  up (-0.259 +0.908 -0.330)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (0.000 0.342 0.940) in camera axes, offset +0.000 +0.000 -0.000 m | frames 1201, poses 1201
+t= 21.3 s  forward (+0.000 +0.342 +0.940)  up (-0.259 +0.908 -0.330)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (0.000 0.342 0.940) in camera axes, offset +0.000 +0.000 -0.000 m | frames 1261, poses 1261
+t= 22.3 s  forward (+0.000 +0.342 +0.940)  up (-0.259 +0.908 -0.330)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (0.000 0.342 0.940) in camera axes, offset +0.000 +0.000 -0.000 m | frames 1321, poses 1321
+t= 23.3 s  forward (+0.000 +0.342 +0.940)  up (-0.259 +0.908 -0.330)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (0.000 0.342 0.940) in camera axes, offset +0.000 +0.000 -0.000 m | frames 1381, poses 1381
+t= 24.3 s  forward (+0.000 +0.342 +0.940)  up (-0.259 +0.908 -0.330)  offset +0.000 +0.000 -0.000 m
+  log: XR: head forward (0.000 0.342 0.940) in camera axes, offset +0.000 +0.000 -0.000 m | frames 1441, poses 1441
+RESULT: 2270 headset poses read in 25 s - the headset feed works outside the game
+exit=0

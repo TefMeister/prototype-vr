@@ -1,0 +1,3 @@
+# OpenXR loader binaries are NOT committed (redistributable, size); fetch per fetch_loader.md
+bin/openxr_loader.dll
+lib/
