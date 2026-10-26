@@ -1,6 +1,8 @@
 # Research index
 
-**Last `/gr` pass: 2026-10-04 (estate sweep, second pass) — CHECK-IN.** Inbox empty; board `OPEN` rows read: one search for prior VR or camera work on Prototype or its Titanium engine found none. Nothing new.
+**Last `/gr` pass: 2026-10-26 (estate sweep) — CHECK-IN.** Inbox empty; board rows are the in-game headset pose and reflection checks, ours to run. One search for another VR or first-person mod: none found. Nothing new.
+
+_Previous: **Last `/gr` pass: 2026-10-04 (estate sweep, second pass) — CHECK-IN.** Inbox empty; board `OPEN` rows read: one search for prior VR or camera work on Prototype or its Titanium engine found none. Nothing new._
 
 _Previous: **Last `/gr` pass: 2026-09-29 (estate sweep) — CHECK-IN.** Inbox empty. Nothing new: the public FOV/fix mods (PrototypeFix, the all-resolutions DLL) are covered by the 09-17 topic; the reader's camera chain (2026-09-29) found what those mods do not name._
 
