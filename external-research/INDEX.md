@@ -1,6 +1,8 @@
 # Research index
 
-**Last `/gr` pass: 2026-10-26 (estate sweep) — CHECK-IN.** Inbox empty; board rows are the in-game headset pose and reflection checks, ours to run. One search for another VR or first-person mod: none found. Nothing new.
+**Last `/gr` pass: 2026-11-07 (estate sweep) — CHECK-IN.** Inbox empty; one combined search found no Prototype VR mod by anyone else; the board rows are ours to run. Nothing new.
+
+_Previous: **Last `/gr` pass: 2026-10-26 (estate sweep) — CHECK-IN.** Inbox empty; board rows are the in-game headset pose and reflection checks, ours to run. One search for another VR or first-person mod: none found. Nothing new._
 
 _Previous: **Last `/gr` pass: 2026-10-04 (estate sweep, second pass) — CHECK-IN.** Inbox empty; board `OPEN` rows read: one search for prior VR or camera work on Prototype or its Titanium engine found none. Nothing new._
 
