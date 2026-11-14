@@ -1,6 +1,8 @@
 # Research index
 
-**Last `/gr` pass: 2026-11-07 (estate sweep) — CHECK-IN.** Inbox empty; one combined search found no Prototype VR mod by anyone else; the board rows are ours to run. Nothing new.
+**Last `/gr` pass: 2026-11-14 (check-ins beside the Keeper's sweep of the same day) — CHECK-IN.** Inbox empty; one search found no Prototype VR mod. Nothing new.
+
+_Previous: **Last `/gr` pass: 2026-11-07 (estate sweep) — CHECK-IN.** Inbox empty; one combined search found no Prototype VR mod by anyone else; the board rows are ours to run. Nothing new._
 
 _Previous: **Last `/gr` pass: 2026-10-26 (estate sweep) — CHECK-IN.** Inbox empty; board rows are the in-game headset pose and reflection checks, ours to run. One search for another VR or first-person mod: none found. Nothing new._
 
